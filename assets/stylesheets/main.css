@@ -1,0 +1,35 @@
+root {
+    -fx-background-color: #CBEBF5;
+}
+
+/*Text fields*/
+.text-field {
+    -fx-effect: dropshadow(gaussian, #1A83CC, 2, 1, 2, 2);
+    -fx-background-color: rgba(101, 223, 246, 1);
+    -fx-padding: 15px;
+    -fx-border-radius: 15px;
+    -fx-text-fill: #00478F;
+    -fx-prompt-text-fill: rgba(50, 50, 50, 0.8);
+}
+
+.text-field:hover, .text-field:focused {
+    -fx-background-color: rgba(101, 223, 246, 0.6);
+}
+
+/*Buttons*/
+.button {
+    -fx-padding: 15px;
+    -fx-border-radius: 15px;
+    -fx-effect: dropshadow(gaussian, #828282, 2, 1, 2, 2);
+    -fx-background-color: rgba(216, 156, 96, 1);
+}
+
+.button:hover {
+    -fx-background-color: rgba(216, 156, 96, 0.6);
+}
+
+/*Table*/
+
+
+/*Drop Shadow Code*/
+/*dropshadow(threes-pass-box, rgba(120, 120, 120, 0.8), 2, 1, 2, 2)*/
