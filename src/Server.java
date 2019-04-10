@@ -110,6 +110,7 @@ class Server implements Serializable {
         @Override
         public void run() {
 
+            //* Player connects to the server
             clients.forEach(player -> player.send("data--connect--" + identifier.toString()));
 
 
@@ -129,6 +130,7 @@ class Server implements Serializable {
                             clients.remove(this);
                             socket.close();
 
+                            //* Player disconnected
                             clients.forEach(player -> player.send("action--leave--" + identifier.toString()));
                             break;
                         case "challenge":
@@ -142,6 +144,7 @@ class Server implements Serializable {
                                     send("action--gameStart");
                                     other.send("action--gameStart");
 
+                                    //* Two players are in game so others know that they can't be played
                                     clients.forEach(player -> player.send("data--starting--" + identifier.toString() + "--" + other.identifier.toString()));
                                 }
 
