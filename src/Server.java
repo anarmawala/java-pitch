@@ -166,6 +166,7 @@ class Server implements Serializable {
         UUID getIdentifier() {
             return identifier;
         }
+        
         void send(String data) {
             try {
                 clients.remove(this);
@@ -176,9 +177,10 @@ class Server implements Serializable {
             } catch (Exception e) {
                 System.out.println("Already closed");
             }
-    
+            
             for (Client player : clients) {
                 player.send("action--leave--" + identifier.toString());
             }
+        }
     }
 }
