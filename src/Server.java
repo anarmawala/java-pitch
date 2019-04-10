@@ -82,22 +82,21 @@ class Server implements Serializable {
         
         private UUID identifier;
         private boolean shouldContinue;
-        private UUID gameIdentifier = null;
         
-        public String getLatest() {
-            return latest;
-        }
+        private UUID inGameWith;
+        private Playable played;
         
-        private String latest;
         Client(Socket s, UUID id) throws Exception {
             //* initializing data members
             socket = s;
             identifier = id;
             shouldContinue = true;
+            inGameWith = null;
+            played = null;
             
             try {
-                in = new ObjectInputStream(socket.getInputStream());
                 out = new ObjectOutputStream(socket.getOutputStream());
+                in = new ObjectInputStream(socket.getInputStream());
                 
                 out.writeUTF(identifier.toString());
                 out.flush();
@@ -130,16 +129,26 @@ class Server implements Serializable {
                             break;
                         case "challenge":
                             if (data[1].equals("accept")) {
-                                //challenge accepted
+                                UUID acceptFrom = UUID.fromString(data[2]);
+                                Client other = Actions.getPlayerWith(acceptFrom, clients);
+                                
+                                if (other != null && other.inGameWith == null && inGameWith == null) {
+                                    other.inGameWith = identifier;
+                                    identifier = other.identifier;
+                                    send("action--gameStart");
+                                    other.send("action--gameStart");
+                                }
+                                
                             } else if (data[1].equals("deny")) {
-                                //challenge denied
+                                UUID denyTo = UUID.fromString(data[2]);
+                            } else {
+                                UUID challengeTo = UUID.fromString(data[1]);
                             }
                             break;
                         case "move":
                             //
                             break;
                         default:
-                            latest = data[0];
                             refresh.run();
                             break;
                     }
@@ -154,10 +163,9 @@ class Server implements Serializable {
             }
         }
         
-        public UUID getIdentifier() {
+        UUID getIdentifier() {
             return identifier;
         }
-        
         void send(String data) {
             try {
                 clients.remove(this);
@@ -168,7 +176,9 @@ class Server implements Serializable {
             } catch (Exception e) {
                 System.out.println("Already closed");
             }
-            clients.forEach(player -> player.send("action--leave--" + identifier.toString()));
-        }
+    
+            for (Client player : clients) {
+                player.send("action--leave--" + identifier.toString());
+            }
     }
 }

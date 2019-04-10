@@ -11,12 +11,11 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
 import java.util.UUID;
 
 public class Controller extends Application {
     
-    Stage mystage;
+    private Stage myStage;
     
     //* all the scenes declaration
     private Scene offline, online;
@@ -32,7 +31,7 @@ public class Controller extends Application {
     
     @Override
     public void start(Stage primaryStage) throws Exception {
-        mystage = primaryStage;
+        myStage = primaryStage;
         
         primaryStage.setTitle("RPSLS Server");
         primaryStage.setScene(offline);
@@ -82,7 +81,7 @@ public class Controller extends Application {
                             server.start();
                             tableView.setItems(server.getClients());
                             
-                            mystage.setScene(online);
+                            myStage.setScene(online);
                         });
                     }}
             );
