@@ -75,7 +75,6 @@ public class Controller extends Application {
                             server = new Server(port, str -> {
                             
                             }, () -> Platform.runLater(() -> {
-                                System.out.println("In Lamba for table refresh");
                                 tableView.refresh();
                             }));
                             server.start();

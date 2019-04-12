@@ -74,7 +74,7 @@ public enum Playable {
                     return 1;
                 return -1;
             default:
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("QUESTION IS NOT A VALID PLAY");
         }
     }
     
