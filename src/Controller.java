@@ -103,7 +103,7 @@ public class Controller extends Application {
         uuid.setCellValueFactory(new PropertyValueFactory<>("identifier"));
         //
         TableColumn<Server.Client, UUID> inGameWith = new TableColumn<>("Playing a game with");
-        inGameWith.setCellValueFactory(new PropertyValueFactory<>("ingamewith"));
+        inGameWith.setCellValueFactory(new PropertyValueFactory<>("inGameWith"));
 
         TableColumn<Server.Client, Playable> played = new TableColumn<>("Played");
         played.setCellValueFactory(new PropertyValueFactory<>("played"));

@@ -71,7 +71,7 @@ class Server implements Serializable {
                     
                     String clientList = "list--";
                     for (Client inList : clients) {
-                        clientList = clientList.concat(inList.identifier.toString() + ":" + (inList.ingamewith == null ? "No" : "Yes") + "++");
+                        clientList = clientList.concat(inList.identifier.toString() + ":" + (inList.inGameWith == null ? "No" : "Yes") + "++");
                     }
                     client.send(clientList);
                     
@@ -102,7 +102,7 @@ class Server implements Serializable {
         private UUID identifier;
         private boolean shouldContinue;
         
-        private UUID ingamewith;
+        private UUID inGameWith;
         private Playable played;
         
         Client(Socket s, UUID id) throws Exception {
@@ -110,7 +110,7 @@ class Server implements Serializable {
             socket = s;
             identifier = id;
             shouldContinue = true;
-            ingamewith = null;
+            inGameWith = null;
             played = null;
             
             try {
@@ -158,9 +158,9 @@ class Server implements Serializable {
                                     UUID acceptFrom = UUID.fromString(data[2]);
                                     Client other = Actions.getPlayerWith(acceptFrom, clients);
                                     
-                                    if (other != null && other.ingamewith == null && ingamewith == null) {
-                                        other.ingamewith = identifier;
-                                        ingamewith = other.identifier;
+                                    if (other != null && other.inGameWith == null && inGameWith == null) {
+                                        other.inGameWith = identifier;
+                                        inGameWith = other.identifier;
                                         
                                         other.played = null;
                                         played = null;
@@ -181,13 +181,13 @@ class Server implements Serializable {
                                 }
                                 break;
                             case "move":
-                                if (ingamewith == null)
+                                if (inGameWith == null)
                                     break;
                                 
-                                Client other = Actions.getPlayerWith(ingamewith, clients);
+                                Client other = Actions.getPlayerWith(inGameWith, clients);
                                 
                                 if (other == null) {
-                                    ingamewith = null;
+                                    inGameWith = null;
                                 } else {
                                     played = Playable.valueOf(data[1]);
                                     if (other.played != null) {
@@ -203,9 +203,9 @@ class Server implements Serializable {
                                             other.send("winner");
                                         }
                                         
-                                        ingamewith = null;
+                                        inGameWith = null;
                                         played = null;
-                                        other.ingamewith = null;
+                                        other.inGameWith = null;
                                         other.played = null;
                                         
                                         Thread.sleep(2000);
@@ -231,8 +231,8 @@ class Server implements Serializable {
             return identifier;
         }
         
-        public UUID getIngamewith() {
-            return ingamewith;
+        public UUID getInGameWith() {
+            return inGameWith;
         }
         
         public Playable getPlayed() {
