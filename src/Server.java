@@ -67,16 +67,25 @@ class Server implements Serializable {
                     }
                     
                     Client client = new Client(server.accept(), id);
+                    refresh.run();
                     
                     String clientList = "list--";
                     for (Client inList : clients) {
-                        clientList = clientList.concat(inList.identifier.toString() + ":" + (inList.inGameWith == null ? "No" : "Yes") + "++");
+                        clientList = clientList.concat(inList.identifier.toString() + ":" + (inList.ingamewith == null ? "No" : "Yes") + "++");
                     }
                     client.send(clientList);
+                    
                     
                     clients.add(client);
                     // TODO add other callback accepts to fully update gui
                     // addMessage.accept("Player " + id.toString() + " connected!");
+                    
+                    //* Player connects to the server
+                    for (Client player : clients) {
+                        player.send("data--connect--" + client.identifier.toString());
+                    }
+                    
+                    
                     client.start();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -93,7 +102,7 @@ class Server implements Serializable {
         private UUID identifier;
         private boolean shouldContinue;
         
-        private UUID inGameWith;
+        private UUID ingamewith;
         private Playable played;
         
         Client(Socket s, UUID id) throws Exception {
@@ -101,7 +110,7 @@ class Server implements Serializable {
             socket = s;
             identifier = id;
             shouldContinue = true;
-            inGameWith = null;
+            ingamewith = null;
             played = null;
             
             try {
@@ -112,6 +121,7 @@ class Server implements Serializable {
                 out.flush();
             } catch (Exception e) {
                 // makes sure that thread isn't run if it fails
+                e.printStackTrace();
                 shouldContinue = false;
                 throw e;
             }
@@ -123,26 +133,23 @@ class Server implements Serializable {
         }
         
         synchronized void handleComm() {
-            //* Player connects to the server
-            clients.forEach(player -> player.send("data--connect--" + identifier.toString()));
-    
-    
+            
             while (true) {
                 // checks if thread should be running
                 if (!shouldContinue)
                     break;
-        
-        
+                
                 try {
                     if (in.available() > 0) {
+                        refresh.run();
                         String[] data = in.readUTF().split("--");
                         System.out.println(Arrays.toString(data));
-    
+                        
                         switch (data[0]) {
                             case "leave":
                                 clients.remove(this);
                                 socket.close();
-            
+                                
                                 //* Player disconnected
                                 clients.forEach(player -> player.send("action--leave--" + identifier.toString()));
                                 break;
@@ -150,85 +157,96 @@ class Server implements Serializable {
                                 if (data[1].equals("accept")) {
                                     UUID acceptFrom = UUID.fromString(data[2]);
                                     Client other = Actions.getPlayerWith(acceptFrom, clients);
-                
-                                    if (other != null && other.inGameWith == null && inGameWith == null) {
-                                        other.inGameWith = identifier;
-                                        identifier = other.identifier;
+                                    
+                                    if (other != null && other.ingamewith == null && ingamewith == null) {
+                                        other.ingamewith = identifier;
+                                        ingamewith = other.identifier;
+                                        
+                                        other.played = null;
+                                        played = null;
+                                        
                                         send("action--gameStart");
                                         other.send("action--gameStart");
-                    
+                                        
                                         //* Two players are in game so others know that they can't be played
                                         clients.forEach(player -> player.send("data--starting--" + identifier.toString() + "--" + other.identifier.toString()));
                                     }
                                 } else {
                                     UUID challengeTo = UUID.fromString(data[1]);
                                     Client other = Actions.getPlayerWith(challengeTo, clients);
-                
+                                    
                                     if (other != null) {
                                         other.send("action--challenged--" + identifier);
                                     }
                                 }
                                 break;
                             case "move":
-                                Client other = Actions.getPlayerWith(inGameWith, clients);
-            
+                                if (ingamewith == null)
+                                    break;
+                                
+                                Client other = Actions.getPlayerWith(ingamewith, clients);
+                                
                                 if (other == null) {
-                                    inGameWith = null;
+                                    ingamewith = null;
                                 } else {
                                     played = Playable.valueOf(data[1]);
                                     if (other.played != null) {
                                         other.send("action--play--" + played.toString());
                                         send("action--play--" + other.played.toString());
+                                        
+                                        int decision = played.beats(other.played);
+                                        if (decision == 1) {
+                                            other.send("loser");
+                                            send("winner");
+                                        } else if (decision == -1) {
+                                            send("loser");
+                                            other.send("winner");
+                                        }
+                                        
+                                        ingamewith = null;
+                                        played = null;
+                                        other.ingamewith = null;
+                                        other.played = null;
+                                        
+                                        Thread.sleep(2000);
+                                        other.send("action--reset");
+                                        send("action--reset");
+                                        clients.forEach(client -> client.send("data--ending--" + identifier + "--" + other.identifier));
                                     }
-                
-                                    int decision = played.beats(other.played);
-                                    if (decision == 1) {
-                                        other.send("loser");
-                                        send("winner");
-                                    } else if (decision == -1) {
-                                        send("loser");
-                                        other.send("winner");
-                                    }
-                
-                                    Thread.sleep(2000);
-                                    other.send("action--reset");
-                                    send("action--reset");
-                                    clients.forEach(client -> client.send("data--ending--" + identifier + "--" + other.identifier));
                                 }
-            
+                                
                                 break;
                         }
-                        refresh.run();
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                     break;
                 }
-        
+                
                 
             }
         }
         
-        UUID getIdentifier() {
+        public UUID getIdentifier() {
             return identifier;
         }
-    
-        UUID getInGameWith() {
-            return inGameWith;
+        
+        public UUID getIngamewith() {
+            return ingamewith;
         }
-    
-        Playable getPlayed() {
+        
+        public Playable getPlayed() {
             return played;
         }
         
-        synchronized void send(String data) {
+        void send(String data) {
             try {
                 out.writeUTF(data);
                 out.flush();
             } catch (Exception e) {
                 e.printStackTrace();
                 clients.remove(this);
-    
+                
                 try {
                     socket.close();
                 } catch (IOException ex) {

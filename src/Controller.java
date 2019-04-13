@@ -101,17 +101,19 @@ public class Controller extends Application {
         
         TableColumn<Server.Client, UUID> uuid = new TableColumn<>("UUID");
         uuid.setCellValueFactory(new PropertyValueFactory<>("identifier"));
-        
-        TableColumn<Server.Client, Button> button = new TableColumn<>("Action");
-        button.setCellValueFactory(new PropertyValueFactory<>("ConnectButton"));
-        
-        TableColumn<Server.Client, Button> string = new TableColumn<>("Latest String");
-        string.setCellValueFactory(new PropertyValueFactory<>("latest"));
+        //
+        TableColumn<Server.Client, UUID> inGameWith = new TableColumn<>("Playing a game with");
+        inGameWith.setCellValueFactory(new PropertyValueFactory<>("ingamewith"));
+
+        TableColumn<Server.Client, Playable> played = new TableColumn<>("Played");
+        played.setCellValueFactory(new PropertyValueFactory<>("played"));
         
         tableView.setItems(FXCollections.observableArrayList());
         tableView.getColumns().add(uuid);
-        tableView.getColumns().add(button);
-        tableView.getColumns().add(string);
+        tableView.getColumns().add(inGameWith);
+        tableView.getColumns().add(played);
+        
+        
         pane.setCenter(tableView);
         
         online = new Scene(pane, 800, 800) {{
