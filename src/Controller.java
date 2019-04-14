@@ -104,13 +104,13 @@ public class Controller extends Application {
         
         TableColumn<Server.Client, UUID> uuid = new TableColumn<Server.Client, UUID>("UUID") {{
             setCellValueFactory(new PropertyValueFactory<Server.Client, UUID>("identifier"));
-            setMinWidth(30);
+            setMinWidth(300);
         }};
         
         
         TableColumn<Server.Client, UUID> inGameWith = new TableColumn<Server.Client, UUID>("Playing a game with") {{
             setCellValueFactory(new PropertyValueFactory<Server.Client, UUID>("inGameWith"));
-            setMinWidth(250);
+            setMinWidth(300);
         }};
         
         
