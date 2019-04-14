@@ -41,6 +41,13 @@ class Server implements Serializable {
     }
     
     void stop() {
+        try {
+            connectionThread.shouldContinue = false;
+            connectionThread.server.close();
+        } catch (Exception e) {
+            System.err.println("Error while closing the ServerSocket");
+        }
+        
         clients.forEach(client -> {
             client.send("data--close");
             client.shouldContinue = false;
