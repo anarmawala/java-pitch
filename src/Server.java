@@ -40,6 +40,21 @@ class Server implements Serializable {
         connectionThread.start();
     }
     
+    void stop() {
+        clients.forEach(client -> {
+            client.send("data--close");
+            client.shouldContinue = false;
+            
+            try {
+                if (!client.socket.isClosed())
+                    client.socket.close();
+                
+            } catch (Exception e) {
+                System.err.println("Error while closing socket");
+            }
+        });
+    }
+    
     ObservableList<Client> getClients() {
         return clients;
     }
@@ -207,7 +222,7 @@ class Server implements Serializable {
                                         } else if (decision == -1) {
                                             send("loser");
                                             other.send("winner");
-    
+                                            
                                             clients.forEach(player -> player.send("data--won--" + other.identifier.toString()));
                                             other.wins++;
                                         }

@@ -49,7 +49,7 @@ public class Controller extends Application {
     
     @Override
     public void stop() throws Exception {
-    
+        server.stop();
     }
     
     private void _init_offline() {
