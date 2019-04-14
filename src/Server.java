@@ -71,7 +71,7 @@ class Server implements Serializable {
                     
                     String clientList = "list--";
                     for (Client inList : clients) {
-                        clientList = clientList.concat(inList.identifier.toString() + ":" + (inList.inGameWith == null ? "No" : "Yes") + "++");
+                        clientList = clientList.concat(inList.identifier.toString() + ":" + (inList.inGameWith == null ? "No" : "Yes") + ":" + inList.wins + "++");
                     }
                     client.send(clientList);
                     
@@ -105,6 +105,8 @@ class Server implements Serializable {
         private UUID inGameWith;
         private Playable played;
         
+        private int wins;
+        
         Client(Socket s, UUID id) throws Exception {
             //* initializing data members
             socket = s;
@@ -112,6 +114,7 @@ class Server implements Serializable {
             shouldContinue = true;
             inGameWith = null;
             played = null;
+            wins = 0;
             
             try {
                 out = new ObjectOutputStream(socket.getOutputStream());
@@ -151,7 +154,7 @@ class Server implements Serializable {
                                 socket.close();
                                 
                                 //* Player disconnected
-                                clients.forEach(player -> player.send("action--leave--" + identifier.toString()));
+                                clients.forEach(player -> player.send("data--leave--" + identifier.toString()));
                                 break;
                             case "challenge":
                                 if (data[1].equals("accept")) {
@@ -198,9 +201,15 @@ class Server implements Serializable {
                                         if (decision == 1) {
                                             other.send("loser");
                                             send("winner");
+                                            
+                                            clients.forEach(player -> player.send("data--won--" + identifier.toString()));
+                                            wins++;
                                         } else if (decision == -1) {
                                             send("loser");
                                             other.send("winner");
+    
+                                            clients.forEach(player -> player.send("data--won--" + other.identifier.toString()));
+                                            other.wins++;
                                         }
                                         
                                         inGameWith = null;
@@ -208,7 +217,7 @@ class Server implements Serializable {
                                         other.inGameWith = null;
                                         other.played = null;
                                         
-                                        Thread.sleep(2000);
+                                        Thread.sleep(3000);
                                         other.send("action--reset");
                                         send("action--reset");
                                         clients.forEach(client -> client.send("data--ending--" + identifier + "--" + other.identifier));
@@ -219,7 +228,8 @@ class Server implements Serializable {
                         }
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    clients.remove(this);
+                    clients.forEach(player -> player.send("data--leave--" + identifier.toString()));
                     break;
                 }
                 
@@ -239,6 +249,10 @@ class Server implements Serializable {
             return played;
         }
         
+        public int getWins() {
+            return wins;
+        }
+        
         void send(String data) {
             try {
                 out.writeUTF(data);
@@ -254,7 +268,7 @@ class Server implements Serializable {
                 }
                 shouldContinue = false;
                 for (Client player : clients) {
-                    player.send("action--leave--" + identifier.toString());
+                    player.send("data--leave--" + identifier.toString());
                 }
             }
         }

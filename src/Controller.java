@@ -11,6 +11,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+
 import java.util.UUID;
 
 public class Controller extends Application {
@@ -99,23 +100,33 @@ public class Controller extends Application {
         
         tableView = new TableView<Server.Client>();
         
-        TableColumn<Server.Client, UUID> uuid = new TableColumn<>("UUID");
-        uuid.setCellValueFactory(new PropertyValueFactory<>("identifier"));
-        uuid.setMinWidth(30);
-        //
-        TableColumn<Server.Client, UUID> inGameWith = new TableColumn<>("Playing a game with");
-        inGameWith.setCellValueFactory(new PropertyValueFactory<>("inGameWith"));
-        inGameWith.setMinWidth(250);
+        TableColumn<Server.Client, UUID> uuid = new TableColumn<Server.Client, UUID>("UUID") {{
+            setCellValueFactory(new PropertyValueFactory<Server.Client, UUID>("identifier"));
+            setMinWidth(30);
+        }};
         
-        TableColumn<Server.Client, Playable> played = new TableColumn<>("Played");
-        played.setCellValueFactory(new PropertyValueFactory<>("played"));
-        played.setMinWidth(90);
+        
+        TableColumn<Server.Client, UUID> inGameWith = new TableColumn<Server.Client, UUID>("Playing a game with") {{
+            setCellValueFactory(new PropertyValueFactory<Server.Client, UUID>("inGameWith"));
+            setMinWidth(250);
+        }};
+        
+        
+        TableColumn<Server.Client, Playable> played = new TableColumn<Server.Client, Playable>("Played") {{
+            setCellValueFactory(new PropertyValueFactory<Server.Client, Playable>("played"));
+            setMinWidth(90);
+        }};
+    
+        TableColumn<Server.Client, Integer> wins = new TableColumn<Server.Client, Integer>("Wins") {{
+            setCellValueFactory(new PropertyValueFactory<Server.Client, Integer>("wins"));
+            setMinWidth(90);
+        }};
         
         tableView.setItems(FXCollections.observableArrayList());
         tableView.getColumns().add(uuid);
         tableView.getColumns().add(inGameWith);
         tableView.getColumns().add(played);
-        
+        tableView.getColumns().add(wins);
         
         pane.setCenter(tableView);
         
