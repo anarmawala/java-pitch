@@ -101,12 +101,15 @@ public class Controller extends Application {
         
         TableColumn<Server.Client, UUID> uuid = new TableColumn<>("UUID");
         uuid.setCellValueFactory(new PropertyValueFactory<>("identifier"));
+        uuid.setMinWidth(30);
         //
         TableColumn<Server.Client, UUID> inGameWith = new TableColumn<>("Playing a game with");
         inGameWith.setCellValueFactory(new PropertyValueFactory<>("inGameWith"));
-
+        inGameWith.setMinWidth(250);
+        
         TableColumn<Server.Client, Playable> played = new TableColumn<>("Played");
         played.setCellValueFactory(new PropertyValueFactory<>("played"));
+        played.setMinWidth(90);
         
         tableView.setItems(FXCollections.observableArrayList());
         tableView.getColumns().add(uuid);
